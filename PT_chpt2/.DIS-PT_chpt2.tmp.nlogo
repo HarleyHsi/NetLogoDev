@@ -233,21 +233,6 @@ ticks
 30.0
 
 SLIDER
-0
-0
-0
-0
-NIL
-NIL
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
 23
 397
 137
@@ -439,6 +424,21 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+198
+53
+370
+86
+ok
+ok
+0
+100
+49.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
