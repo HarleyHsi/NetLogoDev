@@ -23,9 +23,11 @@ ifelse inPrison? = true [
       set inPrison? false
       set color yellow
       print (word "citizen " who "is released from prison")
+      move-to one-of patches with [not any? turtles-here and pcolor != orange]
     ]
   ]
   [;else checking if cops are within vision radius
+    move-to one-of patches with [not any? turtles-here and pcolor != orange]
     let nearby-police other cops in-radius citizen-vision
     if any? nearby-police [
       let police min-one-of nearby-police [distance myself]; identify the cop that is nearest

@@ -78,7 +78,6 @@ breed [citizens citizen]  ;
 breed [cops cop] ;
 
 globals [
-  ;
   max-jailterm
 ]
 
@@ -135,7 +134,7 @@ to setup
     ask one-of prisonpatches [set plabel "PRISON"]
   ; setup restaurant
 
-  let restaurant-patches patches with [ pxcor >= -0 and pxcor <= 30 and pycor >= -20 and pycor <= 20 ]
+  let restaurant-patches patches with [ pxcor >= 30 and pxcor <= 40 and pycor >= 20 and pycor <= 31 ]
     ask restaurant-patches [
       set pcolor orange
       set region "restaurant"
@@ -152,6 +151,7 @@ to setup
     setxy random-xcor random-ycor
     ; make sure the agents are not placed in prison already during setup:
     move-to one-of patches with [ not any? turtles-here and region != "prison"]
+    move-to one-of patches with [not any? turtles-here and pcolor != orange]  ; Flytta "citizens" till en slumpmässig "patch" som inte är svart
     ; setting specific variables for citizen
     set inPrison? false
     set jailtime 0
