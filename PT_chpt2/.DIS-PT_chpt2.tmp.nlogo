@@ -137,7 +137,7 @@ to setup
 
   let restaurant-patches patches with [ pxcor >= -30 and pxcor <= 30 and pycor >= -20 and pycor <= 20 ]
     ask restaurant-patches [
-      set pcolor brow
+      set pcolor orange
       set region "restaurant"
 ]
   ask one-of restaurant-patches [ set plabel "RESTAURANT" ]
