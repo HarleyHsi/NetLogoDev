@@ -135,7 +135,7 @@ to setup
     ask one-of prisonpatches [set plabel "PRISON"]
   ; setup restaurant
 
-  let restaurant-patches patches with [ pxcor >= -30 and pxcor <= 30 and pycor >= -20 and pycor <= 20 ]
+  let restaurant-patches patches with [ pxcor >= 40 and pxcor <= 50 and pycor >= 0 and pycor <= 21 ]
     ask restaurant-patches [
       set pcolor orange
       set region "restaurant"
