@@ -13,30 +13,25 @@ to cop_behavior
   if hunger = 0 [
     move-to one-of patches with [ region = "restaurant" ]
     set hunger 100 ; refill hunger completely (or any other value you prefer)
-  ]
-  
-  if hunger > 0 [
-    let suspect nobody
-    let suspects citizens-here with [inPrison? = false]
-    if any? suspects [
-      set suspect one-of suspects
-      ask suspect [
-        set jailsentence random max-jailterm
-        gotoprison
-      ]
-      face suspect
-      forward cop-speed
+  ; check if citizen is nearby to arrest
+  let suspect one-of citizens-here with [inPrison? = false] ; need to make sure the citizen is not in jail, otherwise can the cop be trapped besides
+    ifelse suspect != nobody [
+        ; move the citizen to prison and mark them as arrested
+        print (word " cop-agent: " who " puts suspect: " suspect " to prison!")
+        set hunger hunger - 1 
+        ask suspect [
+           set jailsentence random max-jailterm
+           gotoprison
+        ]
     ]
-    if not any? suspects [
-      let suspect one-of other citizens with [inPrison? = false] in-radius cop-vision
-      if suspect != nobody [
-        face suspect
-        forward cop-speed
-      ]
+    [; else look for citizens and move towards them
+     set suspect one-of other citizens with [inPrison? = false] in-radius cop-vision
+     if suspect != nobody [
+        print (word " cop-agent: " who " sees suspect: " suspect)
+        face suspect  
     ]
-    set hunger hunger - 1 
+      ]
+    forward cop-speed ; move forward towards suspect
   ]
 end
-
-
 
