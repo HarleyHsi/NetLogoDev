@@ -19,23 +19,29 @@ to cop_behavior
         ask suspect [
            set jailsentence random max-jailterm
            gotoprison
-        ]
+     
     ]
+        ]
+    
     [; else look for citizens and move towards them
      set suspect one-of other citizens with [inPrison? = false] in-radius cop-vision
+     if hunger = 100[
+        move-to one-of patches with [ not any? turtles-here and region != "prison"]
+  ]
      if suspect != nobody [
         print (word " cop-agent: " who " sees suspect: " suspect)
         face suspect
-        set hunger hunger - 25
+    forward cop-speed ; move forward towards suspect
+      set hunger hunger - 20
         if hunger <= 0 [
         print (word " cop-agent: " who " is hungry")
         move-to one-of patches with [region = "restaurant"]
         print (word " cop-agent: " who " ate food")
-    set hunger hunger = 100
+    set hunger 100
     ]
-    forward cop-speed ; move forward towards suspect
+     
+    ]
   ]
-   
-  ]
+  
     
 end

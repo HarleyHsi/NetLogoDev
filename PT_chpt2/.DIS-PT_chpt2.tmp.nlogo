@@ -79,6 +79,7 @@ breed [cops cop] ;
 
 globals [
   max-jailterm
+
 ]
 
 ;---- General agent variables
@@ -151,7 +152,9 @@ to setup
     setxy random-xcor random-ycor
     ; make sure the agents are not placed in prison already during setup:
     move-to one-of patches with [ not any? turtles-here and region != "prison"]
-    move-to one-of patches with [not any? turtles-here and pcolor != orange]  ; Flytta "citizens" till en slumpmässig "patch" som inte är svart
+    move-to one-of patches with [ not any? turtles-here and region != "restaurant"]
+    move-to one-of patches with [not any? turtles-here and pcolor != orange]
+  ; Flytta "citizens" till en slumpmässig "patch" som inte är svart
     ; setting specific variables for citizen
     set inPrison? false
     set jailtime 0
@@ -222,7 +225,7 @@ GRAPHICS-WINDOW
 614
 -1
 -1
-17.5224
+17.72
 1
 10
 1
@@ -251,7 +254,7 @@ num-citizens
 num-citizens
 1
 30
-19.0
+15.0
 1
 1
 NIL

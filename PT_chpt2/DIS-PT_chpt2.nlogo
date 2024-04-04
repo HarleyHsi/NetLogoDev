@@ -79,6 +79,7 @@ breed [cops cop] ;
 
 globals [
   max-jailterm
+  hunger
 ]
 
 ;---- General agent variables
@@ -251,7 +252,7 @@ num-citizens
 num-citizens
 1
 30
-19.0
+15.0
 1
 1
 NIL
