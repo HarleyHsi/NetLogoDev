@@ -26,7 +26,7 @@ to cop_behavior
     [; else look for citizens and move towards them
      set suspect one-of other citizens with [inPrison? = false] in-radius cop-vision
      if hunger = 100[
-        move-to one-of patches with [ not any? turtles-here and region != "prison"]
+        move-to one-of patches with [ not any? turtles-here and region != "RESTAURANT"]
   ]
      if suspect != nobody [
         print (word " cop-agent: " who " sees suspect: " suspect)
@@ -35,7 +35,7 @@ to cop_behavior
       set hunger hunger - 20
         if hunger <= 0 [
         print (word " cop-agent: " who " is hungry")
-        move-to one-of patches with [region = "restaurant"]
+        move-to one-of patches with [region = "RESTAURANT" ]
         print (word " cop-agent: " who " ate food")
     set hunger 100
     ]

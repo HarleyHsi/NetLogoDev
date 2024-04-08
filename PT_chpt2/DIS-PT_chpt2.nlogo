@@ -104,7 +104,6 @@ citizens-own [
 cops-own [
   ;cop-vision is set by slider
   cop-speed
-  hunger
 ]
 
 
@@ -130,7 +129,7 @@ to setup
   let prisonpatches patches with [ pxcor >= -5 and pxcor <= 20 and pycor >= -5 and pycor <= 15 ]
     ask prisonpatches [
       set pcolor gray
-      set region "prison"
+      set region "PRISON"
     ]
     ask one-of prisonpatches [set plabel "PRISON"]
   ; setup restaurant
@@ -138,7 +137,7 @@ to setup
   let restaurant-patches patches with [ pxcor >= 30 and pxcor <= 40 and pycor >= 20 and pycor <= 31 ]
     ask restaurant-patches [
       set pcolor orange
-      set region "restaurant"
+      set region "RESTAURANT"
 ]
   ask one-of restaurant-patches [ set plabel "RESTAURANT" ]
 
@@ -151,8 +150,8 @@ to setup
     set color green
     setxy random-xcor random-ycor
     ; make sure the agents are not placed in prison already during setup:
-    move-to one-of patches with [ not any? turtles-here and region != "prison"]
-    move-to one-of patches with [not any? turtles-here and pcolor != orange]  ; Flytta "citizens" till en slumpmässig "patch" som inte är svart
+    move-to one-of patches with [ not any? turtles-here and region = "PRISON"]
+    move-to one-of patches with [not any? turtles-here and pcolor != "RESTAURANT" ]  ; Flytta "citizens" till en slumpmässig "patch" som inte är orange
     ; setting specific variables for citizen
     set inPrison? false
     set jailtime 0
@@ -168,7 +167,7 @@ to setup
     set color blue
     set cop-speed random 3 + 1 ; make sure it cannot be 0
     set hunger 100
-    move-to one-of patches with [ not any? turtles-here and region != "prison"]
+    move-to one-of patches with [ not any? turtles-here and region != "PRISON"]
   ]
 
 

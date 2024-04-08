@@ -18,16 +18,18 @@ ifelse inPrison? = true [
     if jailtime > jailsentence [; released from prison
       set jailtime 0
       ; move forward where there are no cops and is not prison
-      let places neighborhood with [not any? cops-here and region != "prison"]
+      let places neighborhood with [not any? cops-here and region != "PRISON"]
       if any? places [move-to one-of places]
       set inPrison? false
       set color yellow
       print (word "citizen " who "is released from prison")
       move-to one-of patches with [not any? turtles-here and pcolor != orange]
+     
     ]
   ]
   [;else checking if cops are within vision radius
     move-to one-of patches with [not any? turtles-here and pcolor != orange]
+    
     let nearby-police other cops in-radius citizen-vision
     if any? nearby-police [
       let police min-one-of nearby-police [distance myself]; identify the cop that is nearest
@@ -37,7 +39,7 @@ ifelse inPrison? = true [
       ] 
     ]    
     ; move forward where there are no cops and is not prison
-    let places neighborhood with [not any? cops-here and region != "prison"]
+    let places neighborhood with [not any? cops-here and region != "PRISON"]
     if any? places [move-to one-of places]
   ]
 end
@@ -48,5 +50,5 @@ to gotoprison
   set inPrison? true
   set color red
   ; move to prison into an own cell (=own patch)
-  move-to one-of patches with [not any? turtles-here and region = "prison"]
+  move-to one-of patches with [not any? turtles-here and region = "PRISON"]
 end
