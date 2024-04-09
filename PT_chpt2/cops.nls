@@ -31,7 +31,7 @@ to cop_behavior
      if suspect != nobody [
         print (word " cop-agent: " who " sees suspect: " suspect)
         face suspect
-    forward cop-speed ; move forward towards suspect
+     forward cop-speed ; move forward towards suspect
       set hunger hunger - 20
         if hunger <= 0 [
         print (word " cop-agent: " who " is hungry")
@@ -41,7 +41,5 @@ to cop_behavior
     ]
      
     ]
-  ]
-  
-    
+  ]  
 end

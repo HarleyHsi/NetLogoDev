@@ -150,7 +150,7 @@ to setup
     set color green
     setxy random-xcor random-ycor
     ; make sure the agents are not placed in prison already during setup:
-    move-to one-of patches with [ not any? turtles-here and pcolor != brown and pcolor != orange]
+    move-to one-of patches with [ not any? turtles-here and pcolor != brown and pcolor != brow]
     ;move-to one-of patches with [not any? turtles-here and pcolor != "RESTAURANT" ]  ; Flytta "citizens" till en slumpmässig "patch" som inte är orange
     ; setting specific variables for citizen
     set inPrison? false
