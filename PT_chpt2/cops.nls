@@ -11,6 +11,7 @@
 
 to cop_behavior
   ; check if citizen is nearby to arrest
+  ; set hunger 100
   let suspect one-of citizens-here with [inPrison? = false] ; need to make sure the citizen is not in jail, otherwise can the cop be trapped besides
     ifelse suspect != nobody [
         ; move the citizen to prison and mark them as arrested
@@ -18,15 +19,31 @@ to cop_behavior
         ask suspect [
            set jailsentence random max-jailterm
            gotoprison
-        ]
+
     ]
+        ]
+
     [; else look for citizens and move towards them
      set suspect one-of other citizens with [inPrison? = false] in-radius cop-vision
+     if hunger = 100[
+        move-to one-of patches with [ not any? turtles-here and region != "RESTAURANT"]
+  ]
      if suspect != nobody [
         print (word " cop-agent: " who " sees suspect: " suspect)
-        face suspect  
-    ]
+        face suspect
     forward cop-speed ; move forward towards suspect
+      set hunger hunger - 20
+        if hunger <= 0 [
+        print (word " cop-agent: " who " is hungry")
+        move-to one-of patches with [region = "RESTAURANT" ]
+        print (word " cop-agent: " who " ate food")
+    set hunger 100
+    ]
+
+    ]
   ]
+
+
 end
+
 
