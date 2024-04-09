@@ -78,8 +78,8 @@ breed [citizens citizen]  ;
 breed [cops cop] ;
 
 globals [
-  ;
   max-jailterm
+  hunger
 ]
 
 ;---- General agent variables
@@ -129,9 +129,17 @@ to setup
   let prisonpatches patches with [ pxcor >= -5 and pxcor <= 20 and pycor >= -5 and pycor <= 15 ]
     ask prisonpatches [
       set pcolor gray
-      set region "prison"
+      set region "PRISON"
     ]
     ask one-of prisonpatches [set plabel "PRISON"]
+  ; setup restaurant
+
+  let restaurant-patches patches with [ pxcor >= 30 and pxcor <= 40 and pycor >= 20 and pycor <= 31 ]
+    ask restaurant-patches [
+      set pcolor orange
+      set region "RESTAURANT"
+]
+  ask one-of restaurant-patches [ set plabel "RESTAURANT" ]
 
 
   ; setup citizen-agents
@@ -142,7 +150,8 @@ to setup
     set color green
     setxy random-xcor random-ycor
     ; make sure the agents are not placed in prison already during setup:
-    move-to one-of patches with [ not any? turtles-here and region != "prison"]
+    move-to one-of patches with [ not any? turtles-here and region = "PRISON"]
+    move-to one-of patches with [not any? turtles-here and pcolor != "RESTAURANT" ]  ; Flytta "citizens" till en slumpmässig "patch" som inte är orange
     ; setting specific variables for citizen
     set inPrison? false
     set jailtime 0
@@ -157,7 +166,8 @@ to setup
     set size 2
     set color blue
     set cop-speed random 3 + 1 ; make sure it cannot be 0
-    move-to one-of patches with [ not any? turtles-here and region != "prison"]
+    set hunger 100
+    move-to one-of patches with [ not any? turtles-here and region != "PRISON"]
   ]
 
 
@@ -773,7 +783,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.3.0
+NetLogo 6.4.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
