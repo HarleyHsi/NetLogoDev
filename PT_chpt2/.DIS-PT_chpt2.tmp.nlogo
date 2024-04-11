@@ -60,7 +60,7 @@
 ; ************ INCLUDED FILES *****************
 __includes [
     "citizens.nls"
-  "bdi.nls"
+    "bdi.nls"
     "cops.nls"
     "vid.nls" ; contains the code for the recorder. You also need to activate the vid-extension and the command at the end of setup
 ]
@@ -100,6 +100,7 @@ citizens-own [
   inPrison?
   jailtime
   jailsentence
+
 ]
 ;---- Specific, local variables of cop-agents
 cops-own [
@@ -418,6 +419,17 @@ _______________________________________
 11
 0.0
 1
+
+SWITCH
+306
+155
+464
+188
+show-intentions
+show-intentions
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
