@@ -18,6 +18,9 @@
 ;; There is nothing magical about beliefs: they are simply items 
 ;; of a specific list. Check list processing in NetLogo. However
 ;; here are some usefull procedures. 
+breed [BDI-agents BDI-agent]
+BDI-agents-own [beliefs intentions]
+globals [show-intentions]
 
 ;;; creates a new belief. (does not stores it in belief memory).
 to-report create-belief [b-type content]
