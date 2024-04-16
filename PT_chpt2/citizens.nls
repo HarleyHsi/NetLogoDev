@@ -7,17 +7,17 @@ ifelse inPrison? = true [
     if jailtime > jailsentence [; released from prison
       set jailtime 0
       ; move forward where there are no cops and is not prison
-      let places neighborhood with [not any? cops-here and region != "PRISON"]
+      let places neighborhood with [not any? cops-here and pcolor != brown and pcolor = orange]
       if any? places [move-to one-of places]
       set inPrison? false
       set color yellow
       print (word "citizen " who "is released from prison")
-      move-to one-of patches with [not any? turtles-here and pcolor != orange]
+      move-to one-of patches with [not any? turtles-here and pcolor = orange]
 
     ]
   ]
   [;else checking if cops are within vision radius
-    move-to one-of patches with [not any? turtles-here and pcolor != orange]
+    move-to one-of patches with [not any? turtles-here and pcolor = orange and pcolor != brown]
 
     let nearby-police other cops in-radius citizen-vision
     if any? nearby-police [

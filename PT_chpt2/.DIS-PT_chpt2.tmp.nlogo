@@ -128,9 +128,9 @@ to setup
     set neighborhood patches in-radius citizen-vision
   ]
   ; setup prison
-  let prisonpatches patches with [ pxcor >= -5 and pxcor <= 20 and pycor >= -5 and pycor <= 15 ]
+  let prisonpatches patches with [ pxcor >= - and pxcor <= 20 and pycor >= -5 and pycor <= 15 ]
     ask prisonpatches [
-      set pcolor gray
+      set pcolor brown
       set region "PRISON"
     ]
     ask one-of prisonpatches [set plabel "PRISON"]
@@ -152,8 +152,7 @@ to setup
     set color green
     setxy random-xcor random-ycor
     ; make sure the agents are not placed in prison already during setup:
-    move-to one-of patches with [ not any? turtles-here and region = "PRISON"]
-    move-to one-of patches with [not any? turtles-here and pcolor != "RESTAURANT" ]  ; Flytta "citizens" till en slumpmässig "patch" som inte är orange
+    move-to one-of patches with [ not any? turtles-here and pcolor != brown]
     ; setting specific variables for citizen
     set inPrison? false
     set jailtime 0
@@ -168,7 +167,7 @@ to setup
     set size 2
     set color blue
     set cop-speed random 3 + 1 ; make sure it cannot be 0
-    set hunger 100
+    ;set hunger 100
     move-to one-of patches with [ not any? turtles-here and region != "PRISON"]
   ]
 
@@ -253,7 +252,7 @@ num-citizens
 num-citizens
 1
 30
-19.0
+10.0
 1
 1
 NIL
@@ -302,7 +301,7 @@ num-cops
 num-cops
 0
 50
-4.0
+3.0
 1
 1
 NIL

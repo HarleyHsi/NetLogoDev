@@ -20,7 +20,7 @@
 ;; here are some usefull procedures. 
 breed [BDI-agents BDI-agent]
 BDI-agents-own [beliefs intentions]
-globals [show-intentions]
+;globals [show-intentions]
 
 ;;; creates a new belief. (does not stores it in belief memory).
 to-report create-belief [b-type content]
