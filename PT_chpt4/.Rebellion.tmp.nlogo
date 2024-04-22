@@ -12,6 +12,7 @@ agents-own [
   political-beliefs   ; P, representing agent's political beliefs ranging from 0-1 (inclusive)
   active?             ; if true, then the agent is actively rebelling
   jail-term           ; how many turns in jail remain? (if 0, the agent is not in jail)
+  state               ; current state of the agent in the state machine
 ]
 
 patches-own [
@@ -54,6 +55,7 @@ to setup
     set political-beliefs random-float 1.0  ; Initialize political beliefs
     set active? false
     set jail-term 0
+    set state "Idle"  ; Initialize state as "Idle"
     display-agent
   ]
 
@@ -63,67 +65,87 @@ end
 
 to go
   ask agents [
-    ; Uppdatera övertygelser
+    ; Update beliefs
     update-beliefs
 
-    ; Deliberation - Beslut om vad som ska uppnås
+    ; Deliberate action based on state machine
     deliberate-action
 
-    ; Means-End Reasoning - Hur målet ska uppnås
+    ; Means-End Reasoning - How the goal should be achieved
     execute-action
 
-    ; Regel M: Flytta till en slumpmässig plats inom din synhåll
+    ; Move to a random patch within the agent's vision radius
     if (breed = agents and jail-term = 0) or breed = cops [ move ]
-
-    ; Regel A: Bestäm om varje agent ska vara aktiv eller tyst
-    if breed = agents and jail-term = 0 [ determine-behavior ]
-
-    ; Regel C: Poliser arresterar en slumpmässig aktiv agent inom deras radie
-    if breed = cops [ enforce ]
   ]
 
-  ; Minskning av jail-term för fängslade agenter vid varje tidssteg
+  ; Decrease jail-term for jailed agents at each time step
   ask agents [ if jail-term > 0 [ set jail-term jail-term - 1 ] ]
 
-  ; Uppdatera visning av agenter och poliser
+  ; Update display of agents and cops
   ask agents [ display-agent ]
   ask cops [ display-cop ]
 
-  ; Gå framåt i klockan och uppdatera plottar
+  ; Advance the clock and update plots
   tick
 end
 
 to update-beliefs
-  ; Uppdatera agenter övertygelser här
+  ; Update agents' beliefs here
   ask agents [
-    ; Exempel: Justera politiska övertygelser baserat på risk-aversion och upplevd svårighet
+    ; Adjust political beliefs based on risk-aversion and perceived hardship
     set political-beliefs (risk-aversion + perceived-hardship) / 2
-    ; Ytterligare kod för att uppdatera andra övertygelser kan läggas till här
+    ; Additional code to update other beliefs can be added here
   ]
 end
 
 to deliberate-action
-  ; Implementera övervägandet här för vad agenter ska göra
+  ; Implement the state machine for agent deliberation
   ask agents [
-    ; Exempel: Avgör om agenter ska inleda en revolt baserat på politiska övertygelser
-    ifelse political-beliefs > 0.5
-    [ set active? true ]
+    if state = "Idle" [consider-rebellion]
+    if state = "Considering Rebellion" []
+    if state = "Rebelling" []
+  ]
+end
 
-    [ set active? false ]
-    ; Ytterligare överväganden och beslut kan läggas till här
+to consider-rebellion
+  ; Determine if the agent should consider rebelling based on political beliefs
+  ask agents [
+    ifelse political-beliefs > 0.5 [
+      ; If political beliefs favor rebellion, transition to considering rebellion state
+      set state "Considering Rebellion"
+    ] [
+      ; If political beliefs don't favor rebellion, remain idle
+      set state "Idle"
+    ]
   ]
 end
 
 to execute-action
-  ; Utför handlingar baserat på överväganden och beslut
+  ; Execute actions based on the state machine
   ask agents [
-    if active? [
-      ; Exempel: Initiera en revolt
-      print (word "Agent " who " inleder en revolt!")
-      ; Ytterligare kod för att genomföra handlingar kan läggas till här
+    if state = "Idle" []
+    if state = "Considering Rebellion" [initiate-rebellion]
+    if state = "Rebelling" []
+  ]
+end
+
+to initiate-rebellion
+  ; Check conditions for initiating rebellion
+  ask agents [
+     (risk-aversion * estimated-arrest-probability) > threshold [
+      ; If conditions met, transition to rebelling state
+      set state "Rebelling"
+      ; Perform rebellion actions here
+      print (word "Agent " who " initiates rebellion!")
+    ] [
+      ; If conditions not met, remain in considering rebellion state
+      set state "Considering Rebellion"
     ]
   ]
 end
+
+; Other procedures remain the same as before
+
 
 ; AGENT AND COP BEHAVIOR
 
