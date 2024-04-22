@@ -1,6 +1,3 @@
-<<<<<<< Updated upstream
-
-=======
 breed [ agents an-agent ]
 breed [ cops cop ]
 
@@ -12,6 +9,7 @@ globals [
 agents-own [
   risk-aversion       ; R, fixed for the agent's lifetime, ranging from 0-1 (inclusive)
   perceived-hardship  ; H, also ranging from 0-1 (inclusive)
+  political-beliefs   ; P, representing agent's political beliefs ranging from 0-1 (inclusive)
   active?             ; if true, then the agent is actively rebelling
   jail-term           ; how many turns in jail remain? (if 0, the agent is not in jail)
 ]
@@ -53,6 +51,7 @@ to setup
     set heading 0
     set risk-aversion random-float 1.0
     set perceived-hardship random-float 1.0
+    set political-beliefs random-float 1.0  ; Initialize political beliefs
     set active? false
     set jail-term 0
     display-agent
@@ -63,7 +62,67 @@ to setup
 end
 
 to go
+  ask agents [
+    ; Uppdatera övertygelser
+    update-beliefs
 
+    ; Deliberation - Beslut om vad som ska uppnås
+    deliberate-action
+
+    ; Means-End Reasoning - Hur målet ska uppnås
+    execute-action
+
+    ; Regel M: Flytta till en slumpmässig plats inom din synhåll
+    if (breed = agents and jail-term = 0) or breed = cops [ move ]
+
+    ; Regel A: Bestäm om varje agent ska vara aktiv eller tyst
+    if breed = agents and jail-term = 0 [ determine-behavior ]
+
+    ; Regel C: Poliser arresterar en slumpmässig aktiv agent inom deras radie
+    if breed = cops [ enforce ]
+  ]
+
+  ; Minskning av jail-term för fängslade agenter vid varje tidssteg
+  ask agents [ if jail-term > 0 [ set jail-term jail-term - 1 ] ]
+
+  ; Uppdatera visning av agenter och poliser
+  ask agents [ display-agent ]
+  ask cops [ display-cop ]
+
+  ; Gå framåt i klockan och uppdatera plottar
+  tick
+end
+
+to update-beliefs
+  ; Uppdatera agenter övertygelser här
+  ask agents [
+    ; Exempel: Justera politiska övertygelser baserat på risk-aversion och upplevd svårighet
+    set political-beliefs (risk-aversion + perceived-hardship) / 2
+    ; Ytterligare kod för att uppdatera andra övertygelser kan läggas till här
+  ]
+end
+
+to deliberate-action
+  ; Implementera övervägandet här för vad agenter ska göra
+  ask agents [
+    ; Exempel: Avgör om agenter ska inleda en revolt baserat på politiska övertygelser
+    ifelse political-beliefs > 0.5
+    [ set active? true ]
+
+    [ set active? false ]
+    ; Ytterligare överväganden och beslut kan läggas till här
+  ]
+end
+
+to execute-action
+  ; Utför handlingar baserat på överväganden och beslut
+  ask agents [
+    if active? [
+      ; Exempel: Initiera en revolt
+      print (word "Agent " who " inleder en revolt!")
+      ; Ytterligare kod för att genomföra handlingar kan läggas till här
+    ]
+  ]
 end
 
 ; AGENT AND COP BEHAVIOR
@@ -143,11 +202,6 @@ to display-cop
     [ set shape "triangle" ]
     [ set shape "person soldier" ]
 end
-
-
-; Copyright 2004 Uri Wilensky.
-; See Info tab for full copyright and license.
->>>>>>> Stashed changes
 @#$#@#$#@
 GRAPHICS-WINDOW
 325

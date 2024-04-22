@@ -174,9 +174,6 @@ end
 to display-agent  ; agent procedure
   ifelse visualization = "2D"
     [ display-agent-2d ]
-
-
-
     [ display-agent-3d ]
 end
 
