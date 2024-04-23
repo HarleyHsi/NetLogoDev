@@ -61,6 +61,8 @@ citizens-own [
   
   ;different help-variables
   counter; -----------general purpose counter
+  eventTime; ---------time when the next event starts
+  eventDuration; -----duration of the event
   
 ]
 
@@ -86,6 +88,7 @@ to setup-citizens
     set incoming-queue []
     set destinationxy []
     set walkdesire? false
+
     set counter 0 ; all-purpose counter
   ]
 
@@ -106,6 +109,7 @@ let hidingplaces neighborhood with [not any? cops-here and region = "empty" or r
 ;--- save local position
 set localxy patch-here
   
+
 ;---test purpose
 ;set destinationxy one-of patches with [region = "Restaurant"]
 
@@ -126,7 +130,6 @@ set localxy patch-here
     walkdesire? [moveAround]
     [proactiveBehavior] ; this function always at the end by itself
   )
-  
   
 end
 
@@ -193,6 +196,16 @@ to moveToDestxy
     ask patch-here [set reg region]
     if Debug [print (word who " arrived at destination: " reg)]]
 end
+
+to checkEventTime
+  let currentHour (time mod 24) ; Current hour of the day
+  if (currentHour >= 14 and currentHour <= 20) [
+    if random-float 1 < 0.1 [ ; 10% chance per hour to decide to go
+      set proState "Event"
+    ]
+  ]
+end
+
 ;"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
@@ -204,10 +217,10 @@ to proactiveBehavior
   ;########## Updating the Beliefs that are relevant only for the proactive states ##############
   ;
   ;
-  
+  checkEventTime
   
   ; For testing purposes
-  let StateList (list "Study" "Work" "Unemployed" "WalkingAround" "MeetingFriends" "Go_out" "Political" "Demonstration")
+  let StateList (list "Study" "Work" "Unemployed" "WalkingAround" "MeetingFriends" "Go_out" "Political" "Demonstration" "Event")
   
   
   
@@ -217,7 +230,7 @@ to proactiveBehavior
   ;
   
   ; For testing
-  set proState item (random 8) StateList
+  set proState item (random 9) StateList
   if Debug [print (word who "deliberated proState = " proState)]
   
   
@@ -226,11 +239,12 @@ to proactiveBehavior
     proState = "Study" [study]
     proState = "Work" [work]
     proState = "Unemployed" [unemployed]
-    proState = "WalkingAround" [set walkdesire? true]
+    ;proState = "WalkingAround" [set walkdesire? true]
     proState = "MeetingFriends" [meeting]
     proState = "Go_out" [go_out]
     proState = "Political" [political]
     proState = "Demonstration" [demonstrate]   
+    proState = "Event" [event]
     ; add more states here, the order does not matter
   )
  
@@ -242,15 +256,12 @@ end
 
 to study
   if Debug [print (word who " is in the proactive state Study")]
-  set destinationxy one-of patches with [region = "University"]
-  if localxy = destinationxy [set counter counter + 1]
-  if counter > 3 [set destinationxy homeLoc]
   
 end
 
 to work
   if Debug [print (word who " is in the proactive state Work")]
-  set destinationxy one-of patches with [region = "Workplace"]
+    
 end
 
 to unemployed
@@ -263,7 +274,7 @@ end
 
 to go_out
   if Debug [print (word who " is in the proactive state Go_out")]
-  set destinationxy one-of patches with [region = "Restaurant"]
+    
 end
 
 to political
@@ -272,6 +283,33 @@ end
 
 to demonstrate
   if Debug [print (word who " is in the proactive state Demonstration")]
+end
+
+to Event
+
+   if Debug [print (word who " is going to a social event")]
+  if destinationxy != (patches with [region = "SocialEvents"]) [
+    set destinationxy one-of patches with [region = "SocialEvents"]
+]
+  
+  if localxy = destinationxy [
+    if counter = 0 [
+      let duration random 4 + 1 ; Random duration between 1 and 4 hours
+      set counter duration  ; No need to convert hours to ticks since 1 tick = 1 hour
+      if Debug [print (word who " has started attending an event for " duration " hours")]
+    ]
+    
+    if counter > 0 [
+      set counter counter - 1
+      if Debug [print (word who " event countdown " counter)]
+    ]
+    
+    if counter = 0 [
+      set destinationxy homeLoc ; Citizens go home after the event
+      if Debug [print (word who " is leaving the event to go home")]
+    ]
+  ]    
+
 end
 
 ;""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
