@@ -11,6 +11,7 @@ agents-own [
   perceived-hardship  ; H, also ranging from 0-1 (inclusive)
   active?             ; if true, then the agent is actively rebelling
   jail-term           ; how many turns in jail remain? (if 0, the agent is not in jail)
+
 ]
 
 patches-own [
@@ -61,32 +62,68 @@ to setup
 end
 
 to go
+  ; Update beliefs for all agents not in jail
+  ask agents [ if jail-term = 0 [ update-beliefs ] ]
+
+  ; Deliberation process for all agents not in jail
+  ask agents [ if jail-term = 0 [ deliberate ] ]
+
+  ; Execution of actions
   ask turtles [
-
-
-    ; Regel M: Flytta till en slumpmässig plats inom din synhåll
-    if (breed = agents and jail-term = 0) or breed = cops [ move ]
-
-    ; Regel A: Bestäm om varje agent ska vara aktiv eller tyst
-    if breed = agents and jail-term = 0 [ determine-behavior ]
-
-    ; Regel C: Poliser arresterar en slumpmässig aktiv agent inom deras radie
-    if breed = cops [ enforce ]
+    if (breed = agents and jail-term = 0) [
+      execute-actions
+    ]
+    if breed = cops [
+      enforce
+    ]
   ]
 
-  ; Minskning av jail-term för fängslade agenter vid varje tidssteg
+  ; Decrease jail terms for all jailed agents
   ask agents [ if jail-term > 0 [ set jail-term jail-term - 1 ] ]
 
-  ; Uppdatera visning av agenter och poliser
+  ; Update visual representations of agents and cops
   ask agents [ display-agent ]
   ask cops [ display-cop ]
 
-  ; Gå framåt i klockan och uppdatera plottar
+  ; Advance the simulation clock and update plots
   tick
 end
 
+; New procedures to encapsulate update of beliefs, deliberation and execution of actions
+to update-beliefs
+  ; Update any beliefs, perceived hardships, etc.
+  ; Example: Updating perceived hardship based on local conditions
+  set perceived-hardship perceived-hardship + (random-float 0.1 - 0.05)
+end
 
 
+to deliberate
+  ; Deliberate based on current state and decide whether to activate
+  set active? (grievance - risk-aversion * estimated-arrest-probability > threshold)
+end
+
+
+to execute-actions
+  ; Execute decided actions, move or stay, become active or stay quiet
+  ifelse active? [
+    display-active-behavior]
+      [stay-quiet]
+end
+
+
+to display-active-behavior
+  ; Additional actions for active agents
+  ; This could involve moving to strategic locations or performing acts of rebellion
+  move
+end
+
+
+to stay-quiet
+  ; Actions for non-active agents
+  ; Could simply be to stay still or perform normal activities
+  ; Example: stay on the same patch or move randomly without causing issues
+  fd 1
+end
 
 
 
