@@ -9,15 +9,14 @@ globals [
 agents-own [
   risk-aversion       ; R, fixed for the agent's lifetime, ranging from 0-1 (inclusive)
   perceived-hardship  ; H, also ranging from 0-1 (inclusive)
-  political-beliefs   ; P, representing agent's political beliefs ranging from 0-1 (inclusive)
   active?             ; if true, then the agent is actively rebelling
   jail-term           ; how many turns in jail remain? (if 0, the agent is not in jail)
-  state               ; current state of the agent in the state machine
 ]
 
 patches-own [
   neighborhood        ; surrounding patches within the vision radius
 ]
+
 
 to setup
   clear-all
@@ -52,10 +51,8 @@ to setup
     set heading 0
     set risk-aversion random-float 1.0
     set perceived-hardship random-float 1.0
-    set political-beliefs random-float 1.0  ; Initialize political beliefs
     set active? false
     set jail-term 0
-    set state "Idle"  ; Initialize state as "Idle"
     display-agent
   ]
 
@@ -64,87 +61,33 @@ to setup
 end
 
 to go
-  ask agents [
-    ; Update beliefs
-    update-beliefs
+  ask turtles [
 
-    ; Deliberate action based on state machine
-    deliberate-action
 
-    ; Means-End Reasoning - How the goal should be achieved
-    execute-action
-
-    ; Move to a random patch within the agent's vision radius
+    ; Regel M: Flytta till en slumpmässig plats inom din synhåll
     if (breed = agents and jail-term = 0) or breed = cops [ move ]
+
+    ; Regel A: Bestäm om varje agent ska vara aktiv eller tyst
+    if breed = agents and jail-term = 0 [ determine-behavior ]
+
+    ; Regel C: Poliser arresterar en slumpmässig aktiv agent inom deras radie
+    if breed = cops [ enforce ]
   ]
 
-  ; Decrease jail-term for jailed agents at each time step
+  ; Minskning av jail-term för fängslade agenter vid varje tidssteg
   ask agents [ if jail-term > 0 [ set jail-term jail-term - 1 ] ]
 
-  ; Update display of agents and cops
+  ; Uppdatera visning av agenter och poliser
   ask agents [ display-agent ]
   ask cops [ display-cop ]
 
-  ; Advance the clock and update plots
+  ; Gå framåt i klockan och uppdatera plottar
   tick
 end
 
-to update-beliefs
-  ; Update agents' beliefs here
-  ask agents [
-    ; Adjust political beliefs based on risk-aversion and perceived hardship
-    set political-beliefs (risk-aversion + perceived-hardship) / 2
-    ; Additional code to update other beliefs can be added here
-  ]
-end
 
-to deliberate-action
-  ; Implement the state machine for agent deliberation
-  ask agents [
-    if state = "Idle" [consider-rebellion]
-    if state = "Considering Rebellion" []
-    if state = "Rebelling" []
-  ]
-end
 
-to consider-rebellion
-  ; Determine if the agent should consider rebelling based on political beliefs
-  ask agents [
-    ifelse political-beliefs > 0.5 [
-      ; If political beliefs favor rebellion, transition to considering rebellion state
-      set state "Considering Rebellion"
-    ] [
-      ; If political beliefs don't favor rebellion, remain idle
-      set state "Idle"
-    ]
-  ]
-end
 
-to execute-action
-  ; Execute actions based on the state machine
-  ask agents [
-    if state = "Idle" []
-    if state = "Considering Rebellion" [initiate-rebellion]
-    if state = "Rebelling" []
-  ]
-end
-
-to initiate-rebellion
-  ; Check conditions for initiating rebellion
-  ask agents [
-     (risk-aversion * estimated-arrest-probability) > threshold [
-      ; If conditions met, transition to rebelling state
-      set state "Rebelling"
-      ; Perform rebellion actions here
-      print (word "Agent " who " initiates rebellion!")
-    ] [
-      ; If conditions not met, remain in considering rebellion state
-      set state "Considering Rebellion"
-    ]
-  ]
-end
-
-; Other procedures remain the same as before
 
 
 ; AGENT AND COP BEHAVIOR
@@ -224,6 +167,10 @@ to display-cop
     [ set shape "triangle" ]
     [ set shape "person soldier" ]
 end
+
+
+; Copyright 2004 Uri Wilensky.
+; See Info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
 325

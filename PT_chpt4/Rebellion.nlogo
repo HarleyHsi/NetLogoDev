@@ -17,6 +17,11 @@ patches-own [
   neighborhood        ; surrounding patches within the vision radius
 ]
 
+
+
+
+
+;fajslkfjalsfjd
 to setup
   clear-all
 
