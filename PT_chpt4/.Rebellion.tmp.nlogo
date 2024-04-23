@@ -18,10 +18,6 @@ patches-own [
 ]
 
 
-
-
-
-;fajslkfjalsfjd
 to setup
   clear-all
 
