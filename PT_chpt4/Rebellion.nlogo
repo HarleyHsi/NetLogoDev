@@ -2,129 +2,146 @@ breed [ agents an-agent ]
 breed [ cops cop ]
 
 globals [
-  k                   ; factor for determining arrest probability
-  threshold           ; by how much must G > N to make someone rebel?
+ k                   ; factor for determining arrest probability
+ threshold           ; by how much must G > N to make someone rebel?
+ ;government-legitimacy ; factor influencing agent's grievance
 ]
 
 agents-own [
-  risk-aversion       ; R, fixed for the agent's lifetime, ranging from 0-1 (inclusive)
-  perceived-hardship  ; H, also ranging from 0-1 (inclusive)
-  active?             ; if true, then the agent is actively rebelling
-  jail-term           ; how many turns in jail remain? (if 0, the agent is not in jail)
+ risk-aversion       ; R, fixed for the agent's lifetime, ranging from 0-1 (inclusive)
+ perceived-hardship  ; H, also ranging from 0-1 (inclusive)
+ active?             ; if true, then the agent is actively rebelling
+ jail-term           ; how many turns in jail remain? (if 0, the agent is not in jail)
+ state               ; current state of the agent, can be "IDLE", "ACTIVE", or "QUIET"
 ]
 
 patches-own [
-  neighborhood        ; surrounding patches within the vision radius
+ neighborhood        ; surrounding patches within the vision radius
 ]
 
 
 to setup
-  clear-all
+ clear-all
 
-  ; set globals
-  set k 2.3
-  set threshold 0.1
+ ; set globals
+ set k 2.3
+ set threshold 0.1
+ set government-legitimacy 0.8
 
-  ask patches [
-    ; make background a slightly dark gray
-    set pcolor gray - 1
-    ; cache patch neighborhoods
-    set neighborhood patches in-radius vision
-  ]
 
-  if initial-cop-density + initial-agent-density > 100 [
-    user-message (word
-      "The sum of INITIAL-COP-DENSITY and INITIAL-AGENT-DENSITY "
-      "should not be greater than 100.")
-    stop
-  ]
+ ask patches [
+   ; make background a slightly dark gray
+   set pcolor gray - 1
+   ; cache patch neighborhoods
+   set neighborhood patches in-radius vision
+ ]
 
-  ; create cops
-  create-cops round (initial-cop-density * .01 * count patches) [
-    move-to one-of patches with [ not any? turtles-here ]
-    display-cop
-  ]
+ if initial-cop-density + initial-agent-density > 100 [
+   user-message (word
+     "The sum of INITIAL-COP-DENSITY and INITIAL-AGENT-DENSITY "
+     "should not be greater than 100.")
+   stop
+ ]
 
-  ; create agents
-  create-agents round (initial-agent-density * .01 * count patches) [
-    move-to one-of patches with [ not any? turtles-here ]
-    set heading 0
-    set risk-aversion random-float 1.0
-    set perceived-hardship random-float 1.0
-    set active? false
-    set jail-term 0
-    display-agent
-  ]
+ ; create cops
+ create-cops round (initial-cop-density * .01 * count patches) [
+   move-to one-of patches with [ not any? turtles-here ]
+   display-cop
+ ]
 
-  ; start clock and plot initial state of system
-  reset-ticks
+ ; create agents
+ create-agents round (initial-agent-density * .01 * count patches) [
+   move-to one-of patches with [ not any? turtles-here ]
+   set heading 0
+   set risk-aversion random-float 1.0
+   set perceived-hardship random-float 1.0
+   set active? false
+   set jail-term 0
+    set state "IDLE"
+   display-agent
+ ]
+
+ ; start clock and plot initial state of system
+ reset-ticks
 end
 
 to go
-  ; Update beliefs for all agents not in jail
-  ask agents [ if jail-term = 0 [ update-beliefs ] ]
 
-  ; Deliberation process for all agents not in jail
-  ask agents [ if jail-term = 0 [ deliberate ] ]
-
-  ; Execution of actions
-  ask turtles [
-    if (breed = agents and jail-term = 0) [
-      execute-actions
-    ]
-    if breed = cops [
-      enforce
+  ask agents [
+    if jail-term = 0 [
+      update-beliefs
+      deliberate
+      state-machine
     ]
   ]
 
-  ; Decrease jail terms for all jailed agents
-  ask agents [ if jail-term > 0 [ set jail-term jail-term - 1 ] ]
 
-  ; Update visual representations of agents and cops
-  ask agents [ display-agent ]
-  ask cops [ display-cop ]
 
-  ; Advance the simulation clock and update plots
-  tick
+ ; Execution of actions
+ ask turtles [
+   if (breed = agents and jail-term = 0) [
+     execute-actions
+   ]
+   if breed = cops [
+     enforce
+   ]
+ ]
+
+ ; Decrease jail terms for all jailed agents
+ ask agents [ if jail-term > 0 [ set jail-term jail-term - 1 ] ]
+
+ ; Update visual representations of agents and cops
+ ask agents [ display-agent ]
+ ask cops [ display-cop ]
+
+ ; Advance the simulation clock and update plots
+ tick
 end
+
+to state-machine
+  if state = "IDLE" [
+    ifelse grievance - risk-aversion * estimated-arrest-probability > threshold [
+      set state "ACTIVE"
+      set active? true
+    ] [
+      set state "QUIET"
+      set active? false
+    ]
+  ]
+  if state = "ACTIVE" [
+    move
+
+  ]
+  if state = "QUIET" [
+    right random 360
+    fd 1
+    set color scale-color green perceived-hardship 1.5 -0.5
+  ]
+end
+
+
+
 
 ; New procedures to encapsulate update of beliefs, deliberation and execution of actions
 to update-beliefs
-  ; Update any beliefs, perceived hardships, etc.
-  ; Example: Updating perceived hardship based on local conditions
-  set perceived-hardship perceived-hardship + (random-float 0.1 - 0.05)
+ ; Update any beliefs, perceived hardships, etc.
+ ; Example: Updating perceived hardship based on local conditions
+ set perceived-hardship perceived-hardship + (random-float 0.1 - 0.05)
 end
 
 
 to deliberate
-  ; Deliberate based on current state and decide whether to activate
-  set active? (grievance - risk-aversion * estimated-arrest-probability > threshold)
+ ; Deliberate based on current state and decide whether to activate
+ ;set active? (grievance - risk-aversion * estimated-arrest-probability > threshold)
+  determine-behavior
 end
 
 
 to execute-actions
-  ; Execute decided actions, move or stay, become active or stay quiet
-  ifelse active? [
-    display-active-behavior]
-     ifelse
-        [
-         stay-quiet
-         ]
-end
-
-
-to display-active-behavior
-  ; Additional actions for active agents
-  ; This could involve moving to strategic locations or performing acts of rebellion
-  move
-end
-
-
-to stay-quiet
-  ; Actions for non-active agents
-  ; Could simply be to stay still or perform normal activities
-  ; Example: stay on the same patch or move randomly without causing issues
-  fd 1
+ ; Execute decided actions, move or stay, become active or stay quiet
+ if active?
+  [move]
+     ;[stay-quiet]
 end
 
 
@@ -133,83 +150,84 @@ end
 
 ; move to an empty patch
 to move ; turtle procedure
-  if movement? or breed = cops [
-    ; move to a patch in vision; candidate patches are
-    ; empty or contain only jailed agents
-    let targets neighborhood with [
-      not any? cops-here and all? agents-here [ jail-term > 0 ]
-    ]
-    if any? targets [ move-to one-of targets ]
-  ]
+ if movement? or breed = cops [
+   ; move to a patch in vision; candidate patches are
+   ; empty or contain only jailed agents
+   let targets neighborhood with [
+     not any? cops-here and all? agents-here [ jail-term > 0 ]
+   ]
+   if any? targets [ move-to one-of targets ]
+ ]
 end
 
 ; AGENT BEHAVIOR
 
 to determine-behavior
-  set active? (grievance - risk-aversion * estimated-arrest-probability > threshold)
+ set active? (grievance - risk-aversion * estimated-arrest-probability > threshold)
 end
 
 to-report grievance
-  report perceived-hardship * (1 - government-legitimacy)
+ report perceived-hardship * (1 - government-legitimacy)
 end
 
 to-report estimated-arrest-probability
-  let c count cops-on neighborhood
-  let a 1 + count (agents-on neighborhood) with [ active? ]
-  ; See Info tab for a discussion of the following formula
-  report 1 - exp (- k * floor (c / a))
+ let c count cops-on neighborhood
+ let a 1 + count (agents-on neighborhood) with [ active? ]
+ ; See Info tab for a discussion of the following formula
+ report 1 - exp (- k * floor (c / a))
 end
 
 ; COP BEHAVIOR
 
 to enforce
-  if any? (agents-on neighborhood) with [ active? ] [
-    ; arrest suspect
-    let suspect one-of (agents-on neighborhood) with [ active? ]
-    move-to suspect  ; move to patch of the jailed agent
-    ask suspect [
-      set active? false
-      set jail-term random max-jail-term
-    ]
-  ]
+ if any? (agents-on neighborhood) with [ active? ] [
+   ; arrest suspect
+   let suspect one-of (agents-on neighborhood) with [ active? ]
+   move-to suspect  ; move to patch of the jailed agent
+   ask suspect [
+     set active? false
+     set jail-term random max-jail-term
+   ]
+ ]
 end
 
 ; VISUALIZATION OF AGENTS AND COPS
 
 to display-agent  ; agent procedure
-  ifelse visualization = "2D"
-    [ display-agent-2d ]
-    [ display-agent-3d ]
+ ifelse visualization = "2D"
+   [ display-agent-2d ]
+   [ display-agent-3d ]
 end
 
 to display-agent-2d  ; agent procedure
-  set shape "circle"
-  ifelse active?
-    [ set color red ]
-    [ ifelse jail-term > 0
-        [ set color black + 3 ]
-        [ set color scale-color green grievance 1.5 -0.5 ] ]
+ set shape "circle"
+ ifelse active?
+   [ set color red ]
+   [ ifelse jail-term > 0
+       [ set color black + 3 ]
+       [ set color scale-color green grievance 1.5 -0.5 ] ]
 end
 
 to display-agent-3d  ; agent procedure
-  set color scale-color green grievance 1.5 -0.5
-  ifelse active?
-    [ set shape "person active" ]
-    [ ifelse jail-term > 0
-        [ set shape "person jailed" ]
-        [ set shape "person quiet" ] ]
+ set color scale-color green grievance 1.5 -0.5
+ ifelse active?
+   [ set shape "person active" ]
+   [ ifelse jail-term > 0
+       [ set shape "person jailed" ]
+       [ set shape "person quiet" ] ]
 end
 
 to display-cop
-  set color cyan
-  ifelse visualization = "2D"
-    [ set shape "triangle" ]
-    [ set shape "person soldier" ]
+ set color cyan
+ ifelse visualization = "2D"
+   [ set shape "triangle" ]
+   [ set shape "person soldier" ]
 end
 
 
 ; Copyright 2004 Uri Wilensky.
 ; See Info tab for full copyright and license.
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 325
@@ -281,7 +299,7 @@ government-legitimacy
 government-legitimacy
 0.0
 1.0
-0.82
+0.8
 0.01
 1
 NIL
