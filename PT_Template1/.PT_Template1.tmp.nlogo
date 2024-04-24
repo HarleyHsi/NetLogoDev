@@ -187,8 +187,10 @@ to update-time-flags
 
   ifelse (14 <= hour-of-day and hour-of-day <= 20)[
     set flagEvent true
+    (print word "Time: " hour-of-day)
   ][
     set flagEvent false
+    (print word "Time: " hour-of-day)
   ]
 
   ; Check if it is evening
