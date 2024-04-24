@@ -127,6 +127,7 @@ set localxy patch-here
     any? nearby-police [hideFromCops nearby-police hidingplaces]
     destinationxy != [] [moveToDestxy]
     ;(destinationxy != []) and (destinationxy != localxy) [moveToDestxy]
+    
     walkdesire? [moveAround]
     [proactiveBehavior] ; this function always at the end by itself
   )
@@ -184,6 +185,7 @@ to moveAround
     let footstep neighborhood with [region = "empty" or region = "TownSquare"] 
     if any? footstep [move-to one-of footstep]]
   if Debug [print (word who " is randomly moving around")]
+  set walkdesire? false
 end
 
 to moveToDestxy
@@ -197,14 +199,6 @@ to moveToDestxy
     if Debug [print (word who " arrived at destination: " reg)]]
 end
 
-to checkEventTime
-  let currentHour (time mod 24) ; Current hour of the day
-  if (currentHour >= 14 and currentHour <= 20) [
-    if random-float 1 < 0.1 [ ; 10% chance per hour to decide to go
-      set proState "Event"
-    ]
-  ]
-end
 
 ;"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -217,7 +211,7 @@ to proactiveBehavior
   ;########## Updating the Beliefs that are relevant only for the proactive states ##############
   ;
   ;
-  checkEventTime
+  
   
   ; For testing purposes
   let StateList (list "Study" "Work" "Unemployed" "WalkingAround" "MeetingFriends" "Go_out" "Political" "Demonstration" "Event")
@@ -239,12 +233,12 @@ to proactiveBehavior
     proState = "Study" [study]
     proState = "Work" [work]
     proState = "Unemployed" [unemployed]
-    ;proState = "WalkingAround" [set walkdesire? true]
+    proState = "WalkingAround" [set walkdesire? true]
     proState = "MeetingFriends" [meeting]
     proState = "Go_out" [go_out]
     proState = "Political" [political]
     proState = "Demonstration" [demonstrate]   
-    proState = "Event" [event]
+    proState = "Event" [Event]
     ; add more states here, the order does not matter
   )
  
@@ -257,59 +251,72 @@ end
 to study
   if Debug [print (word who " is in the proactive state Study")]
   
+  
 end
 
 to work
   if Debug [print (word who " is in the proactive state Work")]
+  
+  
     
 end
 
 to unemployed
   if Debug [print (word who " is in the proactive state Unemployed")]
+  
+  
 end
 
 to meeting
   if Debug [print (word who " is in the proactive state MeetingFriends")]
+  
+  
 end
 
 to go_out
   if Debug [print (word who " is in the proactive state Go_out")]
+  
+  
     
 end
 
 to political
   if Debug [print (word who " is in the proactive state Political")]
+  
+  
 end
 
 to demonstrate
   if Debug [print (word who " is in the proactive state Demonstration")]
+  
+  
 end
 
-to Event
 
-   if Debug [print (word who " is going to a social event")]
-  if destinationxy != (patches with [region = "SocialEvents"]) [
-    set destinationxy one-of patches with [region = "SocialEvents"]
-]
-  
-  if localxy = destinationxy [
+to Event
+  if flagEvent [
+      set counter 0
+    move-to one-of patches with [region = "SocialEvents"]
+      ;set proState "Event"
+      ;if destinationxy != (patches with [region = "SocialEvents"]) [
+      ;  set destinationxy one-of patches with [region = "SocialEvents"]      
+    ;]
     if counter = 0 [
-      let duration random 4 + 1 ; Random duration between 1 and 4 hours
-      set counter duration  ; No need to convert hours to ticks since 1 tick = 1 hour
-      if Debug [print (word who " has started attending an event for " duration " hours")]
+      let duration (random 4 + 1); Random duration between 1 and 4 hours, converted to ticks
+      set counter duration
+      if Debug [print (word who " has started attending an event for " duration " ticks")]
     ]
     
     if counter > 0 [
       set counter counter - 1
       if Debug [print (word who " event countdown " counter)]
     ]
-    
-    if counter = 0 [
-      set destinationxy homeLoc ; Citizens go home after the event
+  ]  
+     if counter = 0  or not flagEvent [
+      ;set destinationxy homeLoc ; Citizens go home after the event
+      move-to one-of patches with [region = "house"]
       if Debug [print (word who " is leaving the event to go home")]
-    ]
-  ]    
-
+    ] 
 end
 
 ;""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -60,6 +60,7 @@ globals [
   flagAfternoon;
   flagEvening ; true if it is evening
   flagWeekend ; true if it is a weekend (2-days, Saturday and Sunday)
+  flagEvent
 
 
   ;----- Spatial units, locations
@@ -184,7 +185,11 @@ to update-time-flags
   set flagMorning false
   ]
 
-
+  ifelse (14 <= hour-of-day and hour-of-day <= 20)[
+    set flagEvent true
+  ][
+    set flagEvent false
+  ]
 
   ; Check if it is evening
   ifelse (16 <= hour-of-day and hour-of-day <= 22)[
@@ -305,7 +310,7 @@ citizen-vision
 citizen-vision
 1
 10
-1.0
+5.1
 0.1
 1
 NIL
@@ -320,7 +325,7 @@ cop-vision
 cop-vision
 1
 100
-1.0
+6.4
 0.1
 1
 NIL
@@ -426,7 +431,7 @@ SWITCH
 296
 show-intentions
 show-intentions
-1
+0
 1
 -1000
 
