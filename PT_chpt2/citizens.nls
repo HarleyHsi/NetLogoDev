@@ -1,11 +1,10 @@
 to citizen_behavior
   ask citizens [
-    if state = "in-restaurant" [in-restaurant]
-    if state = "in-prison" [in-prison]
-    if state = "running-away" [running-away]
-    if state = "going-back-to-restaurant" [going-back-to-restaurant]
-    if state = "deciding-to-run" [deciding-to-run]
-    if state = "free" [free]
+    if state = "in-restaurant" [in-restaurant]                             ;reaktiv
+    if state = "in-prison" [in-prison]                                     ;reaktiv
+    if state = "running-away" [running-away]                               ;reaktiv
+    if state = "going-back-to-restaurant" [going-back-to-restaurant]       ;reaktiv
+    if state = "deciding-to-run" [deciding-to-run]                         ;proactiv
   ]
 end
 
@@ -21,7 +20,7 @@ to in-restaurant
 end
 
 to in-prison
- set previous-state state
+  set previous-state state
   
   if inPrison? = true [
     ; Behavior when citizen is in prison
@@ -92,10 +91,6 @@ let nearby-citizens other citizens in-radius citizen-vision with [region = "REST
       ]
     ]
   ]
-end
-
-to free
-  
 end
 
 to gotoprison 
