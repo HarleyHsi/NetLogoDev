@@ -1,44 +1,108 @@
 to citizen_behavior
-
-; checking if the citizen is in prison
-ifelse inPrison? = true [
-    set jailtime jailtime + 1 ;counting the time in prison
-    print (word "citizen " who "is in prison since: " jailtime)
-    if jailtime > jailsentence [; released from prison
-      set jailtime 0
-      ; move forward where there are no cops and is not prison
-      let places neighborhood with [not any? cops-here and pcolor != brown and pcolor = orange]
-      if any? places [move-to one-of places]
-      set inPrison? false
-      set color yellow
-      print (word "citizen " who "is released from prison")
-      move-to one-of patches with [not any? turtles-here and pcolor = orange]
-
-    ]
-  ]
-  [;else checking if cops are within vision radius
-    move-to one-of patches with [not any? turtles-here and pcolor = orange and pcolor != brown]
-
-    let nearby-police other cops in-radius citizen-vision
-    if any? nearby-police [
-      let police min-one-of nearby-police [distance myself]; identify the cop that is nearest
-      if police != nobody [
-        print (word " citizen: " who " sees cop: " police)
-        set heading (towards police) + 180 ; face opposite from the nearest police
-      ] 
-    ]
-    ; move forward where there are no cops and is not prison
-    let places neighborhood with [not any? cops-here and region != "PRISON"]
-    if any? places [move-to one-of places]
+  ask citizens [
+    if state = "in-restaurant" [in-restaurant]
+    if state = "in-prison" [in-prison]
+    if state = "running-away" [running-away]
+    if state = "going-back-to-restaurant" [going-back-to-restaurant]
+    if state = "deciding-to-run" [deciding-to-run]
+    if state = "free" [free]
   ]
 end
 
-; if asked to go to prison
+to in-restaurant
+  ; Code for behavior when citizen is in a restaurant
+  set previous-state state
+  let nearby-police other cops in-radius citizen-vision
+  if any? nearby-police 
+  ;with [region = "RESTAURANT"] 
+  [
+    set state "deciding-to-run"
+  ]
+end
+
+to in-prison
+ set previous-state state
+  
+  if inPrison? = true [
+    ; Behavior when citizen is in prison
+    set jailtime jailtime + 1 ; Counting the time in prison
+    print (word "citizen " who " is in prison since: " jailtime)
+    if jailtime > jailsentence [
+    ; Behavior when citizen is released from prison
+    set jailtime 0
+    ; Move forward where there are no cops and is not prison
+    let places neighborhood with [not any? cops-here and pcolor != brown and pcolor = orange]
+    if any? places [move-to one-of places]
+    set inPrison? false
+    set color yellow
+    print (word "citizen " who " is released from prison")
+    move-to one-of patches with [not any? turtles-here and region != "PRISON" and region != "RESTURANT"]
+    set at-restaurant? false
+    set state "going-back-to-restaurant"
+  ]
+    
+  ] 
+  
+end
+
+to running-away
+  set previous-state state
+  ; Run away from the current position
+  rt random 360  ; Random direction
+  fd speed   ; Increase the distance covered when running away
+
+  ; Ensure the citizen moves to a location sufficiently far from the original threat
+  let safe-place one-of patches with [region != "PRISON" and region != "RESTAURANT" and not any? cops-here]
+  if safe-place != nobody [
+    move-to safe-place
+    set at-restaurant? false
+  ]
+  set state "going-back-to-restaurant"
+end
+  
+
+to going-back-to-restaurant
+  ; Code for behavior when citizen is going back to a restaurant
+  set previous-state state
+ face one-of patches with [region = "RESTAURANT"]
+  
+  ; Move the citizen towards the restaurant with the specified speed
+  while [at-restaurant? = false] [
+    forward speed
+    if any? patches in-radius 1 with [region = "RESTAURANT"] [
+      ; If the citizen is on or near the restaurant, end the loop
+      set state "in-restaurant"
+      set at-restaurant? true
+    ]
+  ]
+end
+
+to deciding-to-run
+  ; Code for behavior when citizen is deciding to run
+   set previous-state state
+let nearby-citizens other citizens in-radius citizen-vision with [region = "RESTAURANT"]
+  if any? nearby-citizens [
+    ask one-of nearby-citizens [
+      ifelse random 100 < 60 [  ; 60% chans att bestämma sig för att springa
+        print (word "citizen " who " has decided to run")
+        set state "running-away"
+      ] [
+        print (word "citizen " who " has decided not to run")
+        set state "in-restaurant"
+      ]
+    ]
+  ]
+end
+
+to free
+  
+end
+
 to gotoprison 
   ; set flag
   set inPrison? true
   set color red
   ; move to prison into an own cell (=own patch)
   move-to one-of patches with [not any? turtles-here and region = "PRISON"]
+  set state "in-prison"
 end
-

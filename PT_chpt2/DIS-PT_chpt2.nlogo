@@ -81,6 +81,11 @@ breed [cops cop] ;
 globals [
   max-jailterm
   hunger
+  state
+  previous-state
+  suspect-detected?
+  last-police-id
+  at-restaurant?
 ]
 
 ;---- General agent variables
@@ -100,6 +105,8 @@ citizens-own [
   inPrison?
   jailtime
   jailsentence
+  speed
+  already-decided-not-to-run?
 
 ]
 ;---- Specific, local variables of cop-agents
@@ -117,6 +124,7 @@ to setup
   clear-all
   ; define global variables that are not set as sliders
   set max-jailterm 50
+  set suspect-detected? false
 
 
   ; setup of the environment:
@@ -152,13 +160,19 @@ to setup
     set color green
     setxy random-xcor random-ycor
     ; make sure the agents are not placed in prison already during setup:
-    move-to one-of patches with [ not any? turtles-here and pcolor != brown]
+    move-to one-of patches with [ not any? turtles-here and pcolor != brown and pcolor = orange]
     ; setting specific variables for citizen
     set inPrison? false
     set jailtime 0
     set jailsentence 0
-    ;set speed random 5 + 1 ; make sure it cannot be 0
+    set speed random 2 + 1 ; make sure it cannot be 0
+    set state "in-restaurant"  ; Set initial state as going to resturant
+    set previous-state state
+    set already-decided-not-to-run? false
+
   ]
+
+
 
   ;---- setup cops
   create-cops num-cops [
