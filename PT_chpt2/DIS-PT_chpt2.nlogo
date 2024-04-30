@@ -83,9 +83,7 @@ globals [
   hunger
   state
   previous-state
-  suspect-detected?
-  last-police-id
-  at-restaurant?
+
 ]
 
 ;---- General agent variables
@@ -106,7 +104,7 @@ citizens-own [
   jailtime
   jailsentence
   speed
-  already-decided-not-to-run?
+  at-restaurant?
 
 ]
 ;---- Specific, local variables of cop-agents
@@ -124,7 +122,6 @@ to setup
   clear-all
   ; define global variables that are not set as sliders
   set max-jailterm 50
-  set suspect-detected? false
 
 
   ; setup of the environment:
@@ -144,7 +141,7 @@ to setup
     ask one-of prisonpatches [set plabel "PRISON"]
   ; setup restaurant
 
-  let restaurant-patches patches with [ pxcor >= 30 and pxcor <= 40 and pycor >= 20 and pycor <= 31 ]
+  let restaurant-patches patches with [ pxcor >= 35 and pxcor <= 40 and pycor >= 20 and pycor <= 30 ]
     ask restaurant-patches [
       set pcolor orange
       set region "RESTAURANT"
@@ -165,10 +162,10 @@ to setup
     set inPrison? false
     set jailtime 0
     set jailsentence 0
-    set speed random 2 + 1 ; make sure it cannot be 0
+    set speed random 3 + 1 ; make sure it cannot be 0
     set state "in-restaurant"  ; Set initial state as going to resturant
     set previous-state state
-    set already-decided-not-to-run? false
+    set at-restaurant? true
 
   ]
 
@@ -266,7 +263,7 @@ num-citizens
 num-citizens
 1
 30
-10.0
+15.0
 1
 1
 NIL
@@ -440,7 +437,7 @@ SWITCH
 188
 show-intentions
 show-intentions
-1
+0
 1
 -1000
 
