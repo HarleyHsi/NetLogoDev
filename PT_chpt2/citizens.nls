@@ -1,9 +1,9 @@
 to citizen_behavior
   ask citizens [
-    if state = "in-restaurant" [in-restaurant]                             ;reaktiv
-    if state = "in-prison" [in-prison]                                     ;reaktiv
-    if state = "running-away" [running-away]                               ;reaktiv
-    if state = "going-back-to-restaurant" [going-back-to-restaurant]       ;reaktiv
+    if state = "in-prison" [in-prison]                                     ;reaktiv prio 1
+    if state = "in-restaurant" [in-restaurant]                             ;reaktiv IDELstate
+    if state = "running-away" [running-away]                               ;reaktiv prio 2
+    if state = "going-back-to-restaurant" [going-back-to-restaurant]       ;reaktiv prio 3
     if state = "deciding-to-run" [deciding-to-run]                         ;proactiv
   ]
 end
@@ -12,8 +12,7 @@ to in-restaurant
   ; Code for behavior when citizen is in a restaurant
   set previous-state state
   let nearby-police other cops in-radius citizen-vision
-  if any? nearby-police 
-  ;with [region = "RESTAURANT"] 
+  if any? nearby-police with [region = "RESTAURANT"] 
   [
     set state "deciding-to-run"
   ]
